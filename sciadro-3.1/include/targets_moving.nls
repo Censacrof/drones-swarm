@@ -39,6 +39,7 @@ to setup_movingTargets
   set environment.simulationTime targets.simulationTime
   set environment.deploymentTime 0
   set performance.detectionTime false
+  set environment.deploymentTime minutes2ticks 4
   
   ;; Impostazioni per scenari con targets in movimento
   if (selectScenario = "fireTracking") [
