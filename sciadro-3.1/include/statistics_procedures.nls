@@ -70,7 +70,7 @@ to test
   ;export_params
   ;write_header_results
   
-  (foreach seed_list [
+  (foreach seed_list [[?1] ->
       
       setup ?1
       print "--------------------------------------"

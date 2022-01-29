@@ -96,7 +96,7 @@ to-report getObstacleAngleList
   
   set obstaclesAngleList []
   
-  (foreach drone.xcorObsSeen drone.ycorObsSeen [
+  (foreach drone.xcorObsSeen drone.ycorObsSeen [[?1 ?2] ->
       if (?1 != xcor or ?2 != ycor) [
         set angle_tmp subtract-headings towardsxy ?1 ?2 heading ;; Angolo del drone rispetto all'ostacolo nella posizione ?1 ?2
         ;type "Obstacle position: " type ?1 type " " type ?2 type " at: " type angle_tmp print " degrees"

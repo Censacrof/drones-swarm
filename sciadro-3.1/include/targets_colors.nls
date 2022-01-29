@@ -69,10 +69,10 @@ end
 
 to-report calculate_color [measurement basic_color]
   
-  let range targets.measurement.max - targets.measurement.min
+  let my_range targets.measurement.max - targets.measurement.min
   let standardized_measurement measurement - targets.measurement.min
   let offset standardized_measurement * 2.9
-  set offset offset / range
+  set offset offset / my_range
   set offset 2.9 - offset
   let target_color basic_color + offset
   report target_color

@@ -149,7 +149,7 @@ to-report obsInFrontNearestTgt
   
   set cone_obs_list sort cone_obs_list
   
-  foreach cone_obs_list [
+  foreach cone_obs_list [[?] ->
     if (? > item 0 light_cone_tgt and ? < item 1 light_cone_tgt) [
       report true
     ]
