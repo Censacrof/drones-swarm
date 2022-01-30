@@ -24,6 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('-H', '--world-height', type=int, default=300, help='Width of the world in patches (min is 50)')
     parser.add_argument('-g', '--get-parameters', action='store_true', help='If set prints all parameters of the simulation to stdout')
     parser.add_argument('-e', '--execute', action='store_true', help='If set executes commands from stdin until EOF before setup')
+    parser.add_argument('-p', '--preview', action='store_true', help='If set generates preview image of each frame')
     args = vars(parser.parse_args())
 
     # check value of parameters
@@ -71,11 +72,15 @@ if __name__ == '__main__':
     # setup output folders
     scenario_dir = (pathlib.Path('.') / args['output']).resolve()
     frames_dir = scenario_dir / 'frames'
+    preview_dir = scenario_dir / 'preview'
     
-    # if frame folder already exists i delete it and create it again
+    # if frame or preview folder already exists i delete them and create it again
     if os.path.exists(frames_dir):
         shutil.rmtree(frames_dir, ignore_errors=True)
+    if os.path.exists(preview_dir):
+        shutil.rmtree(preview_dir, ignore_errors=True)
     os.makedirs(frames_dir)
+    os.makedirs(preview_dir)
 
     # resizing the world accordingly
     cmd = 'resize-world -{0} {0} -{1} {1}'.format(
@@ -104,6 +109,7 @@ if __name__ == '__main__':
     while (workspace.report('how-many-fires') > 0 and tick_count != args['ticks'] and sample_count != args['num_samples']):
         workspace.command('go')
 
+        # if it's time to take another sample
         if tick_count % args['sample_interval'] == 0:
             frame_name = 'frame_{}'.format(sample_count)
             frame_path = frames_dir / frame_name
@@ -114,6 +120,14 @@ if __name__ == '__main__':
             workspace.command('save-fires "{}"'.format(
                 str(frame_path)
             ))
+            
+            # if -p is set export preview of this frame
+            if args['preview']:
+                preview_path = preview_dir / 'preview_{}.png'.format(sample_count)
+                workspace.command('export-view "{}"'.format(
+                    str(preview_path)
+                ))
+
             sample_count += 1
         tick_count += 1
     
