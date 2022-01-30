@@ -1,15 +1,11 @@
-from importlib.resources import path
-import math
-from threading import Thread
-from matplotlib import cm
 import nl4py
 import argparse
 import pathlib
-
-from numpy import Infinity
 import fire_model as fm
 import os
 import shutil
+import sys
+import re
 
 if __name__ == '__main__':
     model_path = pathlib.Path(fm.__file__).parents[0] / 'fire.nlogo'
@@ -26,7 +22,8 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num-samples', type=int, default=-1, help='Maximum number of samples to take')
     parser.add_argument('-W', '--world-width', type=int, default=300, help='Width of the world in patches (min is 50)')
     parser.add_argument('-H', '--world-height', type=int, default=300, help='Width of the world in patches (min is 50)')
-    parser.add_argument('-g', '--get-parameters', action='store_true')
+    parser.add_argument('-g', '--get-parameters', action='store_true', help='If set prints all parameters of the simulation to stdout')
+    parser.add_argument('-e', '--execute', action='store_true', help='If set executes commands from stdin until EOF before setup')
     args = vars(parser.parse_args())
 
     # check value of parameters
@@ -39,8 +36,8 @@ if __name__ == '__main__':
     if args['num_samples'] < -1:
         args['num_samples'] = -1
 
-    args['world_width'] = min(50, args['world_width'])
-    args['world_height'] = min(50, args['world_height'])
+    args['world_width'] = max(50, args['world_width'])
+    args['world_height'] = max(50, args['world_height'])
 
     if not args['get_parameters']:
         print('Initializing nl4py...')
@@ -80,12 +77,24 @@ if __name__ == '__main__':
         shutil.rmtree(frames_dir, ignore_errors=True)
     os.makedirs(frames_dir)
 
-    print('Running \'setup\' on the model...')
+    # resizing the world accordingly
     cmd = 'resize-world -{0} {0} -{1} {1}'.format(
         args['world_width'] // 2,
         args['world_height'] // 2,
     )
-    print(cmd)
+    print(">", cmd)
+
+    # if -e is set execute commands from stdin
+    if args['execute']:
+        print('Execute commands (send EOF to continue):')
+        for line in sys.stdin:
+            # if line is empty a comment ignore it
+            if (re.match(r'(^\s*;.*|^\s*$)', line)):
+                continue
+            workspace.command(line)
+            print(">", line)
+
+    print('Running \'setup\' on the model...')
     workspace.command(cmd)
     workspace.command('setup')
 
