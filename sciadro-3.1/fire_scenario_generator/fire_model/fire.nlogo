@@ -11,6 +11,10 @@ globals [
   initial-trees   ;; how many trees (green patches) we started with
 ]
 
+patches-own [
+  time-to-live
+]
+
 to setup
   clear-all
   ;; make some green trees
@@ -21,7 +25,11 @@ to setup
 
   ask n-of number-of-fires patches with [abs pxcor < 90 and abs pycor < 90] [
     set pcolor red
-    ask neighbors [ set pcolor red ]
+    ask neighbors [
+      set pcolor red
+      set time-to-live fire-lifetime
+    ]
+    set time-to-live fire-lifetime
   ]
 
   ;; keep track of how many trees there are
@@ -38,6 +46,7 @@ to go
   ;; If any are unburned trees (green patches), change their probability
   ;; of igniting based on the wind direction
   ask patches with [pcolor = red] [
+
     ;; ask the unburned trees neighboring the burning tree
     ask neighbors4 with [pcolor = green] [
       let probability probability-of-spread
@@ -72,18 +81,22 @@ to go
         set probability probability + west-wind-speed ]
       if random 100 < probability [
         set pcolor red ;; to catch on fire
+        set time-to-live fire-lifetime
         ;; if big jumps is on, then sparks can fly farther
         if big-jumps? [
           let target patch-at (west-wind-speed / 5) (south-wind-speed / 5)
           if target != nobody and [ pcolor ] of target = green [
             ask target [
               set pcolor red ;; to ignite the target patch
+              set time-to-live fire-lifetime
             ]
           ]
         ]
       ]
     ]
-    set pcolor red - 3.5;; once the tree is burned, darken its color
+
+    ifelse time-to-live <= 0 [ set pcolor red - 3.5 ] [ set time-to-live (time-to-live - 1) ]
+    ;set pcolor red - 3.5;; once the tree is burned, darken its color
   ]
 
   tick   ;; advance the clock by one “tick”
@@ -107,7 +120,6 @@ to save-fires [file]
   ]
   file-close
 end
-
 
 
 
@@ -174,7 +186,7 @@ density
 density
 0.0
 100.0
-70.0
+80.0
 1.0
 1
 %
@@ -223,7 +235,7 @@ probability-of-spread
 probability-of-spread
 0
 100
-51.0
+17.0
 1
 1
 %
@@ -238,7 +250,7 @@ south-wind-speed
 south-wind-speed
 -25
 25
-9.0
+7.0
 1
 1
 NIL
@@ -253,7 +265,7 @@ west-wind-speed
 west-wind-speed
 -25
 25
-8.0
+2.0
 1
 1
 NIL
@@ -279,7 +291,22 @@ number-of-fires
 number-of-fires
 1
 10
-3.0
+1.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+15
+455
+187
+488
+fire-lifetime
+fire-lifetime
+1
+5
+5.0
 1
 1
 NIL
