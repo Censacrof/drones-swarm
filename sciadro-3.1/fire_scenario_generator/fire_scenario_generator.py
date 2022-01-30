@@ -1,21 +1,47 @@
 from importlib.resources import path
+import math
 from threading import Thread
+from matplotlib import cm
 import nl4py
 import argparse
 import pathlib
+
+from numpy import Infinity
 import fire_model as fm
 import os
 import shutil
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description="Generates a dynamic fire scenario")
-    parser.add_argument('netlogo-home', type=pathlib.Path)
-    parser.add_argument('-o', '--output', type=pathlib.Path, help='Name of the generated scenario')
-    parser.add_argument('-t', '--ticks', type=int, help='Number of ticks to simulate')
-    args = vars(parser.parse_args())
     model_path = pathlib.Path(fm.__file__).parents[0] / 'fire.nlogo'
-    
-    print(f'Initializing nl4py...')
+
+    # shell argument parsing
+    parser = argparse.ArgumentParser(
+        description="Generates a dynamic fire scenario",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument('netlogo-home', type=pathlib.Path)
+    parser.add_argument('-o', '--output', type=pathlib.Path, default=pathlib.Path('./fire_scenario'), help='Path of the generated scenario')
+    parser.add_argument('-t', '--ticks', type=int, default=-1, help='Maximum number of ticks to simulate')
+    parser.add_argument('-i', '--sample-interval', type=int, default=1, help='Ticks interval in between samples')
+    parser.add_argument('-n', '--num-samples', type=int, default=-1, help='Maximum number of samples to take')
+    parser.add_argument('-W', '--world-width', type=int, default=300, help='Width of the world in patches (min is 50)')
+    parser.add_argument('-H', '--world-height', type=int, default=300, help='Width of the world in patches (min is 50)')
+    args = vars(parser.parse_args())
+
+    # check value of parameters
+    if args['ticks'] < -1:
+        args['ticks'] = -1
+
+    if args['sample_interval'] < 0:
+        args['sample_interval'] = 0
+
+    if args['num_samples'] < -1:
+        args['num_samples'] = -1
+
+    args['world_width'] = min(50, args['world_width'])
+    args['world_height'] = min(50, args['world_height'])
+
+    print('Initializing nl4py...')
     nl4py.initialize(args['netlogo-home'])
 
     print('Creating headless workspace...')
@@ -24,26 +50,48 @@ if __name__ == '__main__':
     print('Opening fire model...')
     workspace.open_model(str(model_path))
 
-    ########    
-    gen_scenario_name = args['output'] if args['output'] is not None else 'fireScenario'
-    scenario_dir = pathlib.Path('.').resolve() / gen_scenario_name
+    # setup output folders
+    scenario_dir = (pathlib.Path('.') / args['output']).resolve()
     frames_dir = scenario_dir / 'frames'
     
+    # if frame folder already exists i delete it and create it again
     if os.path.exists(frames_dir):
         shutil.rmtree(frames_dir, ignore_errors=True)
     os.makedirs(frames_dir)
 
-
+    print('Running \'setup\' on the model...')
+    cmd = 'resize-world -{0} {0} -{1} {1}'.format(
+        args['world_width'] // 2,
+        args['world_height'] // 2,
+    )
+    print(cmd)
+    workspace.command(cmd)
     workspace.command('setup')
-    count_max = args['ticks'] if args['ticks'] is not None else -1
-    count = 0
-    while (workspace.report('how-many-fires') > 0 and count != count_max):
-        workspace.command('go')
-        workspace.command('save-fires "{}"'.format(
-            str(frames_dir / 'frame_{}'.format(count))
-        ))
 
-        count += 1
+    print('Simulating...')
+    tick_count = 0
+    sample_count = 0
+    while (workspace.report('how-many-fires') > 0 and tick_count != args['ticks'] and sample_count != args['num_samples']):
+        workspace.command('go')
+
+        if tick_count % args['sample_interval'] == 0:
+            frame_name = 'frame_{}'.format(tick_count)
+            frame_path = frames_dir / frame_name
+            print('(tick {})\tgenerating {}...'.format(
+                tick_count,
+                str(frame_name)
+            ))
+            workspace.command('save-fires "{}"'.format(
+                str(frame_path)
+            ))
+            sample_count += 1
+        tick_count += 1
+    
+    # export snapshot of the world in the final state
+    print('Generating preview {}'.format(str(scenario_dir / 'snapshot.png')))
+    workspace.command('export-view "{}"'.format(
+        str(scenario_dir / 'snapshot.png')
+    ))
 
     print('Closing fire model...')
     workspace.close_model()
