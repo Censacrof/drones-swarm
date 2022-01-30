@@ -105,7 +105,7 @@ if __name__ == '__main__':
         workspace.command('go')
 
         if tick_count % args['sample_interval'] == 0:
-            frame_name = 'frame_{}'.format(tick_count)
+            frame_name = 'frame_{}'.format(sample_count)
             frame_path = frames_dir / frame_name
             print('(tick {})\tgenerating {}...'.format(
                 tick_count,
