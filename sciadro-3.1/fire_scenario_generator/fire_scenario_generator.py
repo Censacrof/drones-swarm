@@ -26,6 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('-n', '--num-samples', type=int, default=-1, help='Maximum number of samples to take')
     parser.add_argument('-W', '--world-width', type=int, default=300, help='Width of the world in patches (min is 50)')
     parser.add_argument('-H', '--world-height', type=int, default=300, help='Width of the world in patches (min is 50)')
+    parser.add_argument('-g', '--get-parameters', action='store_true')
     args = vars(parser.parse_args())
 
     # check value of parameters
@@ -41,14 +42,34 @@ if __name__ == '__main__':
     args['world_width'] = min(50, args['world_width'])
     args['world_height'] = min(50, args['world_height'])
 
-    print('Initializing nl4py...')
+    if not args['get_parameters']:
+        print('Initializing nl4py...')
     nl4py.initialize(args['netlogo-home'])
 
-    print('Creating headless workspace...')
+    if not args['get_parameters']:
+        print('Creating headless workspace...')
     workspace = nl4py.create_headless_workspace()
 
-    print('Opening fire model...')
+    if not args['get_parameters']:
+        print('Opening fire model...')
     workspace.open_model(str(model_path))
+    
+    # if -g is set i print all the parameters of the model    
+    if args['get_parameters']:
+        params = workspace.get_param_names()
+        ranges = workspace.get_param_ranges()
+        for i in range(len(params)):
+            print('; range {0}\nset {1} {2}\n'.format(
+                ranges[i],
+                params[i],
+                '{0}{1}{0}'.format(
+                    '"' if isinstance(ranges[0], str) else '',
+                    ranges[0][0]
+                )
+            ))
+        workspace.close_model()
+        nl4py.delete_headless_workspace(workspace)
+        exit(0)
 
     # setup output folders
     scenario_dir = (pathlib.Path('.') / args['output']).resolve()
