@@ -15,7 +15,7 @@ if __name__ == '__main__':
         description="Generates a dynamic fire scenario",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('netlogo-home', type=pathlib.Path, help='Top level directory of the Netlogo installation')
+    parser.add_argument('netlogo_home', type=pathlib.Path, help='Top level directory of the Netlogo installation')
     parser.add_argument('-o', '--output', type=pathlib.Path, default=pathlib.Path('./fire_scenario'), help='Path of the generated scenario')
     parser.add_argument('-t', '--ticks', type=int, default=-1, help='Maximum number of ticks to simulate')
     parser.add_argument('-i', '--sample-interval', type=int, default=1, help='Ticks interval in between samples')
@@ -25,35 +25,35 @@ if __name__ == '__main__':
     parser.add_argument('-g', '--get-parameters', action='store_true', help='If set prints all parameters of the simulation to stdout')
     parser.add_argument('-e', '--execute', action='store_true', help='If set executes commands from stdin until EOF before setup')
     parser.add_argument('-p', '--preview', action='store_true', help='If set generates preview image of each frame')
-    args = vars(parser.parse_args())
+    args = parser.parse_args()
 
     # check value of parameters
-    if args['ticks'] < -1:
-        args['ticks'] = -1
+    if args.ticks < -1:
+        args.ticks = -1
 
-    if args['sample_interval'] < 0:
-        args['sample_interval'] = 0
+    if args.sample_interval < 0:
+        args.sample_interval = 0
 
-    if args['num_samples'] < -1:
-        args['num_samples'] = -1
+    if args.num_samples < -1:
+        args.num_samples = -1
 
-    args['world_width'] = max(50, args['world_width'])
-    args['world_height'] = max(50, args['world_height'])
+    args.world_width = max(50, args.world_width)
+    args.world_height = max(50, args.world_height)
 
-    if not args['get_parameters']:
+    if not args.get_parameters:
         print('Initializing nl4py...')
-    nl4py.initialize(args['netlogo-home'])
+    nl4py.initialize(args.netlogo_home)
 
-    if not args['get_parameters']:
+    if not args.get_parameters:
         print('Creating headless workspace...')
     workspace = nl4py.create_headless_workspace()
 
-    if not args['get_parameters']:
+    if not args.get_parameters:
         print('Opening fire model...')
     workspace.open_model(str(model_path))
     
     # if -g is set i print all the parameters of the model    
-    if args['get_parameters']:
+    if args.get_parameters:
         params = workspace.get_param_names()
         ranges = workspace.get_param_ranges()
         for i in range(len(params)):
@@ -70,7 +70,7 @@ if __name__ == '__main__':
         exit(0)
 
     # setup output folders
-    scenario_dir = (pathlib.Path('.') / args['output']).resolve()
+    scenario_dir = (pathlib.Path('.') / args.output).resolve()
     frames_dir = scenario_dir / 'frames'
     preview_dir = scenario_dir / 'preview'
     
@@ -84,13 +84,13 @@ if __name__ == '__main__':
 
     # resizing the world accordingly
     cmd = 'resize-world -{0} {0} -{1} {1}'.format(
-        args['world_width'] // 2,
-        args['world_height'] // 2,
+        args.world_width // 2,
+        args.world_height // 2,
     )
     print(">", cmd)
 
     # if -e is set execute commands from stdin
-    if args['execute']:
+    if args.execute:
         print('Execute commands (send EOF to continue):')
         for line in sys.stdin:
             # if line is empty a comment ignore it
@@ -106,11 +106,11 @@ if __name__ == '__main__':
     print('Simulating...')
     tick_count = 0
     sample_count = 0
-    while (workspace.report('how-many-fires') > 0 and tick_count != args['ticks'] and sample_count != args['num_samples']):
+    while (workspace.report('how-many-fires') > 0 and tick_count != args.ticks and sample_count != args.num_samples):
         workspace.command('go')
 
         # if it's time to take another sample
-        if tick_count % args['sample_interval'] == 0:
+        if tick_count % args.sample_interval == 0:
             frame_name = 'frame_{}'.format(sample_count)
             frame_path = frames_dir / frame_name
             print('(tick {})\tgenerating {}...'.format(
@@ -122,7 +122,7 @@ if __name__ == '__main__':
             ))
             
             # if -p is set export preview of this frame
-            if args['preview']:
+            if args.preview:
                 preview_path = preview_dir / 'preview_{}.png'.format(sample_count)
                 workspace.command('export-view "{}"'.format(
                     str(preview_path)
