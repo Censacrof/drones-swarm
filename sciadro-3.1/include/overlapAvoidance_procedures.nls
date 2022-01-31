@@ -67,14 +67,15 @@ end
 
 to unlockPatches
   
-  if (drone.lockedPatches != 0 or drone.lockedPatches = who) [
-    ask drone.lockedPatches [
-      set locked 0
-      ;set pcolor black ;;DEBUG
+  if (is-agentset? drone.lockedPatches) [
+    if (drone.lockedPatches != 0 or drone.lockedPatches = who) [
+      ask drone.lockedPatches [
+        set locked 0
+        ;set pcolor black ;;DEBUG
+      ]
+      ;set drone.lockedPatches 0
     ]
-    ;set drone.lockedPatches 0
   ]
-  
 end
 
 ;;=============================== LISTA PATCHES PRENOTABILI ============================================
