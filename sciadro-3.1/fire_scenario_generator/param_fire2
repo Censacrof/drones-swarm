@@ -1,5 +1,5 @@
 ; ============== single fire, strong wind ==============
-: cat param_fire2 | python3 fire_scenario_generator.py ~/NetLogo\ 6.2.2 -o ../scenarios/fire2 -p -n 7 -i 40 -e
+; cat param_fire2 | python3 fire_scenario_generator.py ~/NetLogo\ 6.2.2 -o ../scenarios/fire2 -p -n 7 -i 40 -e
 
 ; range [0.0, 1.0, 100.0]
 set density 80.0
