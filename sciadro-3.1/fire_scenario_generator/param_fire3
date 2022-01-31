@@ -1,0 +1,25 @@
+; ============== multiple fires, strong wind ==============
+; cat param_fire3 | python3 fire_scenario_generator.py ~/NetLogo\ 6.2.2 -o ../scenarios/fire3 -p -n 7 -i 27 -e
+
+; range [0.0, 1.0, 100.0]
+set density 80.0
+
+; range [0.0, 1.0, 100.0]
+set probability-of-spread 18.0
+
+; range [-25.0, 1.0, 25.0]
+set south-wind-speed 2.0
+
+; range [-25.0, 1.0, 25.0]
+set west-wind-speed -10.0
+
+; range [True, False]
+set big-jumps? true
+
+; range [1.0, 1.0, 10.0]
+set number-of-fires 3.0
+
+; range [1.0, 1.0, 5.0]
+set fire-lifetime 5.0
+
+random-seed 8
