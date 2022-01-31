@@ -189,8 +189,8 @@ end
 GRAPHICS-WINDOW
 362
 10
-772
-421
+1076
+725
 -1
 -1
 2.0
@@ -203,10 +203,10 @@ GRAPHICS-WINDOW
 0
 0
 1
--100
-100
--100
-100
+-176
+176
+-176
+176
 1
 1
 1
@@ -327,8 +327,8 @@ CHOOSER
 80
 selectScenario
 selectScenario
-"dump" "fireTracking" "h2sLeak" "ruralMine" "shapeScenario" "urbanMine" "viareggioLPG" "blank"
-0
+"dump" "fireTracking" "h2sLeak" "ruralMine" "shapeScenario" "urbanMine" "viareggioLPG" "fire1" "blank"
+7
 
 MONITOR
 27
@@ -360,7 +360,7 @@ CHOOSER
 selectElement
 selectElement
 "drone" "obstacle" "target"
-0
+2
 
 BUTTON
 252
