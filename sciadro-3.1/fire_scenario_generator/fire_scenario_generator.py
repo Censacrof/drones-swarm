@@ -15,7 +15,7 @@ if __name__ == '__main__':
         description="Generates a dynamic fire scenario",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('netlogo-home', type=pathlib.Path)
+    parser.add_argument('netlogo-home', type=pathlib.Path, help='Top level directory of the Netlogo installation')
     parser.add_argument('-o', '--output', type=pathlib.Path, default=pathlib.Path('./fire_scenario'), help='Path of the generated scenario')
     parser.add_argument('-t', '--ticks', type=int, default=-1, help='Maximum number of ticks to simulate')
     parser.add_argument('-i', '--sample-interval', type=int, default=1, help='Ticks interval in between samples')
