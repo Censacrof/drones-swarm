@@ -447,6 +447,106 @@ to-report get_path_file [ name_file_to_open ]
   
 end
 
+;;========================================== SET PARAMETER =====================================================
+to set_parameter [ var_name  value ]
+  if (var_name = "simulationTime") [
+    set targets.simulationTime minutes2ticks value
+  ]
+  if (var_name = "strategy") [
+    set strategy? value
+  ]
+  if (var_name = "droneRadius") [
+    set drone.radius value
+  ]
+  if (var_name = "sightAngleMax") [
+    set drone.sight.angleMax value
+  ]
+  if (var_name = "maxSpeed") [
+    set drone.speedMax value
+  ]
+  if (var_name = "cruisingSpeed") [
+    set drone.cruisingSpeed value
+  ]
+  if (var_name = "acceleration") [
+    set drone.acceleration value
+  ]
+  if (var_name = "deceleration") [
+    set drone.deceleration value
+  ]
+  if (var_name = "angularVelMax") [
+    set drone.velocityAngularMax value
+  ]
+  if (var_name = "angularAcc") [
+    set drone.accelerationAng value
+  ]
+  if (var_name = "angularDec") [
+    set drone.decelerationAng value
+  ]
+  if (var_name = "endurance") [
+    set drone.endurance value
+  ]
+  if (var_name = "sensingRadius") [
+    set sensing.radius  value
+  ]
+  if (var_name = "sensingAngle") [
+    set sensing.angle value
+  ]
+  if (var_name = "sensingBase") [
+    set rectangleBase value
+  ]
+  if (var_name = "sensingHeight") [
+    set rectangleHeight value
+  ]
+  if (var_name = "reachableRadius") [
+    set drone.reachable.radius value
+  ]
+  if (var_name = "reachableAngle") [
+    set drone.reachable.angle value
+  ]
+  if (var_name = "collisionVision") [
+    set drone.collision.vision value
+  ]
+  if (var_name = "gapAngle") [
+    set drone.collision.gapAngle value
+  ]
+  if (var_name = "radiusTop") [
+    set mark.radiusTop value
+  ]
+  if (var_name = "radiusDown") [
+    set mark.radiusDown value
+  ]
+  if (var_name = "evapRate") [
+    set track.evapRate value
+  ]
+  if (var_name = "olfaction") [
+    set olfactoryHabituation value
+  ]
+  if (var_name = "flockAngle") [
+    set drone.flocking.angle value
+  ]
+  if (var_name = "wiggleVar") [
+    set drone.flocking.wiggleVar value
+  ]
+  if (var_name = "radiusSeparate") [
+    set drone.flocking.radiusSeparate value
+  ]
+  if (var_name = "maxSeparateTurn") [
+    set drone.flocking.maxSeparateTurn value
+  ]
+  if (var_name = "radiusAlign") [
+    set drone.flocking.radiusAlign value
+  ]
+  if (var_name = "maxAlignTurn") [
+    set drone.flocking.maxAlignTurn  value
+  ]
+  if (var_name = "radiusCohere") [
+    set drone.flocking.radiusCohere value
+  ]
+  if (var_name = "maxCohereTurn") [
+    set drone.flocking.maxCohereTurn value
+  ]
+end
+
 ;;======================================== IMPORT CONFIGURATION ================================================
 
 to import_configuration
@@ -463,102 +563,7 @@ to import_configuration
       let var_name_tmp get_variable_name str_tmp
       let value_tmp get_value str_tmp
       
-      if (var_name_tmp = "simulationTime") [
-        set targets.simulationTime minutes2ticks value_tmp
-      ]
-      if (var_name_tmp = "strategy") [
-        set strategy? value_tmp
-      ]
-      if (var_name_tmp = "droneRadius") [
-        set drone.radius value_tmp
-      ]
-      if (var_name_tmp = "sightAngleMax") [
-        set drone.sight.angleMax value_tmp
-      ]
-      if (var_name_tmp = "maxSpeed") [
-        set drone.speedMax value_tmp
-      ]
-      if (var_name_tmp = "cruisingSpeed") [
-        set drone.cruisingSpeed value_tmp
-      ]
-      if (var_name_tmp = "acceleration") [
-        set drone.acceleration value_tmp
-      ]
-      if (var_name_tmp = "deceleration") [
-        set drone.deceleration value_tmp
-      ]
-      if (var_name_tmp = "angularVelMax") [
-        set drone.velocityAngularMax value_tmp
-      ]
-      if (var_name_tmp = "angularAcc") [
-        set drone.accelerationAng value_tmp
-      ]
-      if (var_name_tmp = "angularDec") [
-        set drone.decelerationAng value_tmp
-      ]
-      if (var_name_tmp = "endurance") [
-        set drone.endurance value_tmp
-      ]
-      if (var_name_tmp = "sensingRadius") [
-        set sensing.radius  value_tmp
-      ]
-      if (var_name_tmp = "sensingAngle") [
-        set sensing.angle value_tmp
-      ]
-      if (var_name_tmp = "sensingBase") [
-        set rectangleBase value_tmp
-      ]
-      if (var_name_tmp = "sensingHeight") [
-        set rectangleHeight value_tmp
-      ]
-      if (var_name_tmp = "reachableRadius") [
-        set drone.reachable.radius value_tmp
-      ]
-      if (var_name_tmp = "reachableAngle") [
-        set drone.reachable.angle value_tmp
-      ]
-      if (var_name_tmp = "collisionVision") [
-        set drone.collision.vision value_tmp
-      ]
-      if (var_name_tmp = "gapAngle") [
-        set drone.collision.gapAngle value_tmp
-      ]
-      if (var_name_tmp = "radiusTop") [
-        set mark.radiusTop value_tmp
-      ]
-      if (var_name_tmp = "radiusDown") [
-        set mark.radiusDown value_tmp
-      ]
-      if (var_name_tmp = "evapRate") [
-        set track.evapRate value_tmp
-      ]
-      if (var_name_tmp = "olfaction") [
-        set olfactoryHabituation value_tmp
-      ]
-      if (var_name_tmp = "flockAngle") [
-        set drone.flocking.angle value_tmp
-      ]
-      if (var_name_tmp = "wiggleVar") [
-        set drone.flocking.wiggleVar value_tmp
-      ]
-      if (var_name_tmp = "radiusSeparate") [
-        set drone.flocking.radiusSeparate value_tmp
-      ]
-      if (var_name_tmp = "maxSeparateTurn") [
-        set drone.flocking.maxSeparateTurn value_tmp
-      ]
-      if (var_name_tmp = "radiusAlign") [
-        set drone.flocking.radiusAlign value_tmp
-      ]
-      if (var_name_tmp = "maxAlignTurn") [
-        set drone.flocking.maxAlignTurn  value_tmp
-      ]
-      if (var_name_tmp = "radiusCohere") [
-        set drone.flocking.radiusCohere value_tmp
-      ]
-      if (var_name_tmp = "maxCohereTurn") [
-        set drone.flocking.maxCohereTurn value_tmp
-      ]
+      set_parameter var_name_tmp value_tmp
     ]
   ]
   

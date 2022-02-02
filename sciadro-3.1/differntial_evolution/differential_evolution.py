@@ -11,6 +11,7 @@ import re
 import multiprocessing
 import numpy as np
 from datetime import date, datetime
+import json
 
 class ParameterDefinitions:
     fixed = []
@@ -24,21 +25,9 @@ class ParameterDefinitions:
     def from_file(path : pathlib.Path) -> 'ParameterDefinitions':
         try:
             with open(str(path), 'r') as f:
-                fixed = []
-                variable = []
-
-                for line in f:
-                    # matches fixed parameter: param = value
-                    match = re.match(r'^\s*([A-z-_]+)\s*=\s*(\d+(?:\.\d+)?)\s*(?:#.*)?\s*$', line)
-                    if match:
-                        fixed.append((match.group(1), float(match.group(2))))
-                        continue
-
-                    # matches variable parameter: param = (lb, ub)
-                    match = re.match(r'^\s*([A-z-_]+)\s*=\s*\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\s*\)\s*(?:#.*)?\s*$', line)
-                    if match:
-                        variable.append((match.group(1) ,  float(match.group(2)), float(match.group(3))))
-                        continue
+                parameters = json.load(f)
+                fixed = [(k, v) for k, v in parameters['fixed'].items()]
+                variable = [(k, v[0], v[1]) for k, v in parameters['variable'].items()]
                 
                 return ParameterDefinitions(fixed, variable)
         except Exception as e:
@@ -81,13 +70,13 @@ def objective_function(variables : List[int], *args):
 
     print_pid('Setting parameters...')
     for (k, v) in parameter_definitions.fixed:
-        cmd = f'set {k} {v}'
+        cmd = f'set_parameter "{k}" {v}'
         # print_pid('(fixed)', cmd)
         workspace.command(cmd)
     
     for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
         v = variables[i]
-        cmd = f'set {k} {v}'
+        cmd = f'set_parameter "{k}" {v}'
         workspace.command(cmd)
         # print_pid('(variable)', cmd)
 
