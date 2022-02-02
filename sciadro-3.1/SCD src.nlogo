@@ -21,6 +21,7 @@ __includes [
 
   ;"include/imperfect_sensing.nls"
 
+  "include/fire_differential_evolution.nls"
 ]
 
 ;;===================================================  PROCEDURA GO ======================================================
@@ -185,6 +186,11 @@ to checkRecognitionShape [ xcord ycord colorTarget thresholdTarget ]
   ]
 
 end
+
+
+to load_scenario
+  setup read-from-string substring date-and-time 9 12
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 362
@@ -219,7 +225,7 @@ BUTTON
 111
 119
 load scenario
-setup read-from-string substring date-and-time 9 12
+load_scenario
 NIL
 1
 T

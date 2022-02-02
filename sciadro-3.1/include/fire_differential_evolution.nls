@@ -1,0 +1,47 @@
+globals [
+  ticks-before-locate
+  shuld-stop-simulation?
+  located-threshold
+]
+
+to run-simulation-with-moving-targets
+  set ticks-before-locate []
+  set located-threshold 95
+  
+  let last-time-slot targets.timeSlot  
+  let located false
+  set shuld-stop-simulation? false
+  while [ not shuld-stop-simulation? and ticks <= environment.deploymentTime + targets.transitionPeriod * targets.configurations ] [
+    go
+    
+    if (targets.timeSlot > -1) [
+      ; ticks since the beginning of the current timeslot
+      let ellapsed (ticks - (environment.deploymentTime + targets.transitionPeriod * targets.timeSlot))
+      
+      if (not located and percentageTgtsFound > located-threshold) [
+        set located true
+        set ticks-before-locate lput ellapsed ticks-before-locate
+      ]
+      
+      if (last-time-slot > -1 and last-time-slot != targets.timeSlot) [
+        ifelse located [
+          set located false
+        ] [
+          ifelse percentageTgtsFound != 0 [
+            let estimate located-threshold * ellapsed / percentageTgtsFound
+            set ticks-before-locate lput estimate ticks-before-locate
+          ] [
+            set ticks-before-locate lput 1000 ticks-before-locate
+          ]          
+        ]
+      ]
+    ]
+    
+    set last-time-slot targets.timeSlot
+  ]
+end
+
+to-report fitness-moving-targets
+  report mean ticks-before-locate
+end
+  
