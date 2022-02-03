@@ -12,6 +12,7 @@ import multiprocessing
 import numpy as np
 from datetime import date, datetime
 import json
+import sys
 
 class ParameterDefinitions:
     fixed = []
@@ -52,6 +53,7 @@ class ParameterDefinitions:
 def print_pid(*args, **kwargs):
     pid = multiprocessing.current_process().name
     print(f'{pid}:', *args, **kwargs)
+    sys.stdout.flush()
 
 
 def objective_function(variables : List[int], *args):
@@ -102,7 +104,7 @@ if __name__ == '__main__':
     )
     parser.add_argument('netlogo_path', type=pathlib.Path, help='Path of the top level directory of the Netlogo installation')
     parser.add_argument('model_path', type=pathlib.Path, help='Path of the model to optimize')
-    parser.add_argument('bounds_path', type=pathlib.Path, help='Path of file containg the parameters\' bounds')
+    parser.add_argument('parameters_path', type=pathlib.Path, help='Path of file containg the parameters\' bounds')
     args = parser.parse_args()
 
 
@@ -110,7 +112,7 @@ if __name__ == '__main__':
     nl4py.initialize(args.netlogo_path)
 
     print('Loading parameters...')
-    parameter_definitions = ParameterDefinitions.from_file(args.bounds_path)
+    parameter_definitions = ParameterDefinitions.from_file(args.parameters_path)
     print(parameter_definitions)
 
     print('Executing differential evolution...')
