@@ -123,13 +123,13 @@ if __name__ == '__main__':
         workers=-1,
         updating='deferred',
         popsize=1,
-        maxiter=1,
+        maxiter=5,
         polish=False,
         tol=0.01,
         disp=True
     )
 
     print(res)
-    for i, (k, lb, ub) in parameter_definitions.variable:
+    for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
         v = res.x[i]
         print(f'\t{k}={v}')
