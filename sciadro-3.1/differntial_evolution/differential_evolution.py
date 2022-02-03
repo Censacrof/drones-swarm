@@ -124,8 +124,12 @@ if __name__ == '__main__':
         updating='deferred',
         popsize=1,
         maxiter=1,
+        polish=False,
         tol=0.01,
         disp=True
     )
 
     print(res)
+    for i, (k, lb, ub) in parameter_definitions.variable:
+        v = res.x[i]
+        print(f'\t{k}={v}')
