@@ -4,11 +4,11 @@
         "simulationTime": 0,
 
         "droneRadius": 0.2,
-        "cruisingSpeed": 2,
+        "cruisingSpeed": 1,
         "speedMax": 8.5,
         "acceleration": 2,
         "deceleration": -2,
-        "angularVelMax": 2.6,
+        "angularVelMax": 120,
         "angularAcc": 7,
         "angularDec": -7,
         "endurance": 24,
