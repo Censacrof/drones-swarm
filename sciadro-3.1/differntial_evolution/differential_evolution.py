@@ -1,5 +1,6 @@
 import argparse
 import enum
+from genericpath import exists
 from logging import exception
 import pathlib
 from pydoc import resolve
@@ -105,8 +106,8 @@ if __name__ == '__main__':
     parser.add_argument('netlogo_path', type=pathlib.Path, help='Path of the top level directory of the Netlogo installation')
     parser.add_argument('model_path', type=pathlib.Path, help='Path of the model to optimize')
     parser.add_argument('parameters_path', type=pathlib.Path, help='Path of file containg the parameters\' bounds')
+    parser.add_argument('-m','--max-iter', type=int, default=1, help='Maximum number of iterations of the differential evolution algorithm')
     args = parser.parse_args()
-
 
     print('Initializing nl4py...')
     nl4py.initialize(args.netlogo_path)
@@ -115,17 +116,26 @@ if __name__ == '__main__':
     parameter_definitions = ParameterDefinitions.from_file(args.parameters_path)
     print(parameter_definitions)
 
-    print('Executing differential evolution...')
+    if len(parameter_definitions.variable):
+        print('Variable parameters are not provided')
+        exit()
+
+    workers = multiprocessing.cpu_count()
+    popsize = workers // len(parameter_definitions.variable)
+    max_func_evaluations = (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
+    print(f'(workers: {workers}; maxiter: {args.max_iter}; popsize: {popsize}; maximum number of evaluations: {max_func_evaluations})\nExecuting differential evolution...\n')
     res = differential_evolution(
         func=objective_function,
         bounds=parameter_definitions.get_variable_parameters_bounds(),
         args=(args.model_path, parameter_definitions),
-        workers=-1,
+        workers=workers,
         updating='deferred',
-        popsize=1,
+        popsize=popsize,
         maxiter=5,
         polish=False,
         tol=0.01,
+        recombination=0.4,
+        init='latinhypercube',
         disp=True
     )
 
