@@ -85,14 +85,16 @@ def objective_function(variables : List[int], *args):
 
     print_pid('Simulating...')
     workspace.command('run-simulation-with-moving-targets')
-    fitness = workspace.report('fitness-moving-targets') # the lower the better
+    fitness = workspace.report('fitness-moving-targets') # average of percentage of time found in the timeslots
 
     workspace.close_model()
     nl4py.delete_headless_workspace(workspace)
 
     time_ellapsed = datetime.now() - start_time
     print_pid(f'Done in {time_ellapsed}! fitness value: {fitness}')
-    return fitness
+
+    # since differential_evolution minimizes and we want to maximize, return fitness with changed sign
+    return -fitness
 
 
 if __name__ == '__main__':
@@ -116,14 +118,15 @@ if __name__ == '__main__':
     parameter_definitions = ParameterDefinitions.from_file(args.parameters_path)
     print(parameter_definitions)
 
-    if len(parameter_definitions.variable):
+    if len(parameter_definitions.variable) == 0:
         print('Variable parameters are not provided')
         exit()
 
     workers = multiprocessing.cpu_count()
     popsize = workers // len(parameter_definitions.variable)
     max_func_evaluations = (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
-    print(f'(workers: {workers}; maxiter: {args.max_iter}; popsize: {popsize}; maximum number of evaluations: {max_func_evaluations})\nExecuting differential evolution...\n')
+    print(f'(workers: {workers}; maxiter: {args.max_iter}; popsize: {popsize}; maximum number of evaluations: {max_func_evaluations})')
+    print('Executing differential evolution...\n')
     res = differential_evolution(
         func=objective_function,
         bounds=parameter_definitions.get_variable_parameters_bounds(),
