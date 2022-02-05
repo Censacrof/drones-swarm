@@ -59,7 +59,7 @@ def print_pid(*args, **kwargs):
 
 def objective_function(variables : List[int], *args):
     start_time = datetime.now()
-    model_path, parameter_definitions, = args
+    model_path, scenario, parameter_definitions, = args
 
     print_pid('Creating workspace...')
     workspace = nl4py.create_headless_workspace()
@@ -67,8 +67,8 @@ def objective_function(variables : List[int], *args):
     print_pid('Opening model...')
     workspace.open_model(str(model_path))
 
-    print_pid('Loading scenario...')
-    workspace.command('set selectScenario "fire1"')
+    print_pid(f'Loading scenario: {scenario}...')
+    workspace.command(f'set selectScenario "{scenario}"')
     workspace.command('load_scenario')
 
     print_pid('Setting parameters...')
@@ -107,6 +107,7 @@ if __name__ == '__main__':
     )
     parser.add_argument('netlogo_path', type=pathlib.Path, help='Path of the top level directory of the Netlogo installation')
     parser.add_argument('model_path', type=pathlib.Path, help='Path of the model to optimize')
+    parser.add_argument('scenario', type=str, help='Name of the scenario to simulate')
     parser.add_argument('parameters_path', type=pathlib.Path, help='Path of file containg the parameters\' bounds')
     parser.add_argument('-m','--max-iter', type=int, default=1, help='Maximum number of iterations of the differential evolution algorithm')
     args = parser.parse_args()
@@ -130,7 +131,7 @@ if __name__ == '__main__':
     res = differential_evolution(
         func=objective_function,
         bounds=parameter_definitions.get_variable_parameters_bounds(),
-        args=(args.model_path, parameter_definitions),
+        args=(args.model_path, args.scenario, parameter_definitions),
         workers=workers,
         updating='deferred',
         popsize=popsize,
