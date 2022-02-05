@@ -134,7 +134,7 @@ if __name__ == '__main__':
         workers=workers,
         updating='deferred',
         popsize=popsize,
-        maxiter=5,
+        maxiter=args.max_iter,
         polish=False,
         tol=0.01,
         recombination=0.4,
