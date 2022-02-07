@@ -59,7 +59,7 @@ def print_pid(*args, **kwargs):
 
 def objective_function(variables : List[int], *args):
     start_time = datetime.now()
-    model_path, scenario, parameter_definitions, = args
+    model_path, scenario, parameter_definitions, samples = args
 
     print_pid('Creating workspace...')
     workspace = nl4py.create_headless_workspace()
@@ -67,34 +67,40 @@ def objective_function(variables : List[int], *args):
     print_pid('Opening model...')
     workspace.open_model(str(model_path))
 
-    print_pid(f'Loading scenario: {scenario}...')
-    workspace.command(f'set selectScenario "{scenario}"')
-    workspace.command('load_scenario')
+    fitness = 0
+    for samp_number in range(samples):
+        print_pid(f'(sample {samp_number}) Loading scenario: {scenario}...')
+        workspace.command(f'set selectScenario "{scenario}"')
+        workspace.command('load_scenario')
 
-    print_pid('Setting parameters...')
-    for (k, v) in parameter_definitions.fixed:
-        cmd = f'set_parameter "{k}" {v}'
-        # print_pid('(fixed)', cmd)
-        workspace.command(cmd)
-    
-    for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
-        v = variables[i]
-        cmd = f'set_parameter "{k}" {v}'
-        workspace.command(cmd)
-        # print_pid('(variable)', cmd)
+        print_pid(f'(sample {samp_number}) Setting parameters...')
+        average = 0
+        for (k, v) in parameter_definitions.fixed:
+            cmd = f'set_parameter "{k}" {v}'
+            # print_pid('(fixed)', cmd)
+            workspace.command(cmd)
+        
+        for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
+            v = variables[i]
+            cmd = f'set_parameter "{k}" {v}'
+            workspace.command(cmd)
+            # print_pid('(variable)', cmd)
 
-    print_pid('Simulating...')
-    workspace.command('run-simulation-with-moving-targets')
-    fitness = workspace.report('fitness-moving-targets') # average of percentage of time found in the timeslots
+        print_pid(f'(sample {samp_number}) Simulating...')
+        workspace.command('run-simulation-with-moving-targets')
+        fitness = workspace.report('fitness-moving-targets') # average of percentage of time found in the timeslots
+        average += fitness
+
+    average /= samples # take the average of all samples
 
     workspace.close_model()
     nl4py.delete_headless_workspace(workspace)
 
     time_ellapsed = datetime.now() - start_time
-    print_pid(f'Done in {time_ellapsed}! fitness value: {fitness}')
+    print_pid(f'Done in {time_ellapsed}! average fitness value: {average}')
 
     # since differential_evolution minimizes and we want to maximize, return fitness with changed sign
-    return -fitness
+    return -average
 
 
 if __name__ == '__main__':
@@ -110,6 +116,7 @@ if __name__ == '__main__':
     parser.add_argument('scenario', type=str, help='Name of the scenario to simulate')
     parser.add_argument('parameters_path', type=pathlib.Path, help='Path of file containg the parameters\' bounds')
     parser.add_argument('-m','--max-iter', type=int, default=1, help='Maximum number of iterations of the differential evolution algorithm')
+    parser.add_argument('-s','--samples', type=int, default=1, help='Number of samples for each individual')
     args = parser.parse_args()
 
     print('Initializing nl4py...')
@@ -131,7 +138,7 @@ if __name__ == '__main__':
     res = differential_evolution(
         func=objective_function,
         bounds=parameter_definitions.get_variable_parameters_bounds(),
-        args=(args.model_path, args.scenario, parameter_definitions),
+        args=(args.model_path, args.scenario, parameter_definitions, args.samples),
         workers=workers,
         updating='deferred',
         popsize=popsize,
