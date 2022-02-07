@@ -132,8 +132,8 @@ if __name__ == '__main__':
 
     workers = multiprocessing.cpu_count()
     popsize = max(1, workers // len(parameter_definitions.variable))
-    max_func_evaluations = (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
-    print(f'(workers: {workers}; maxiter: {args.max_iter}; popsize: {popsize}; maximum number of evaluations: {max_func_evaluations})')
+    max_func_evaluations = args.samples * (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
+    print(f'(workers: {workers}; maxiter: {args.max_iter}; popsize: {popsize}; samples: {args.samples}; maximum number of evaluations: {max_func_evaluations})')
     print('Executing differential evolution...\n')
     res = differential_evolution(
         func=objective_function,
