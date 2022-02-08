@@ -59,33 +59,47 @@ def print_pid(*args, **kwargs):
 
 def objective_function(variables : List[int], *args):
     start_time = datetime.now()
-    model_path, scenario, parameter_definitions, num_samples = args
+    (
+        model_path,
+        scenario,
+        parameter_definitions,
+        num_samples,
+        max_func_evaluations,
+        func_evaluations_counter,
+        func_evaluations_counter_lock
+    ) = args
 
-    print_pid('Creating workspace...')
+    evaluation_id = None
+    with func_evaluations_counter_lock:
+        evaluation_id = func_evaluations_counter.get() + 1
+        func_evaluations_counter.set(evaluation_id)
+
+
+    add_heading = lambda s: f'\t(ev: {evaluation_id}/{max_func_evaluations}) ' + s
+
+    print_pid(add_heading('Creating workspace...'))
     workspace = nl4py.create_headless_workspace()
 
-    print_pid('Opening model...')
+    print_pid(add_heading('Opening model...'))
     workspace.open_model(str(model_path))
 
     samples = []
-    for samp_id in range(num_samples):
-        print_pid(f'(sample {samp_id}) Loading scenario: {scenario}...')
+    for samp_id in range(1, num_samples + 1):
+        print_pid(add_heading(f'(sample {samp_id}) Loading scenario: {scenario}...'))
         workspace.command(f'set selectScenario "{scenario}"')
         workspace.command('load_scenario')
 
-        print_pid(f'(sample {samp_id}) Setting parameters...')
+        print_pid(add_heading(f'(sample {samp_id}) Setting parameters...'))
         for (k, v) in parameter_definitions.fixed:
             cmd = f'set_parameter "{k}" {v}'
-            # print_pid('(fixed)', cmd)
             workspace.command(cmd)
         
         for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
             v = variables[i]
             cmd = f'set_parameter "{k}" {v}'
             workspace.command(cmd)
-            # print_pid('(variable)', cmd)
 
-        print_pid(f'(sample {samp_id}) Simulating...')
+        print_pid(add_heading(f'(sample {samp_id}) Simulating...'))
         workspace.command('run-simulation-with-moving-targets')
         fitness = workspace.report('fitness-moving-targets') # average of percentage of time found in the timeslots
         samples.append(fitness)
@@ -96,7 +110,7 @@ def objective_function(variables : List[int], *args):
     nl4py.delete_headless_workspace(workspace)
 
     time_ellapsed = datetime.now() - start_time
-    print_pid(f'Done in {time_ellapsed}! samples: {samples}; average: {average}')
+    print_pid(add_heading(f'Done in {time_ellapsed}! samples: {samples}; average: {average}'))
 
     # since differential_evolution minimizes and we want to maximize, return fitness with changed sign
     return -average
@@ -132,12 +146,25 @@ if __name__ == '__main__':
     workers = multiprocessing.cpu_count()
     popsize = max(1, workers // len(parameter_definitions.variable))
     max_func_evaluations = args.samples * (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
+
+    manager = multiprocessing.Manager()
+    func_evaluations_counter = manager.Value(int, 0)
+    func_evaluations_counter_lock = manager.Lock()
+
     print(f'(workers: {workers}; maxiter: {args.max_iter}; popsize: {popsize}; samples: {args.samples}; maximum number of evaluations: {max_func_evaluations})')
     print('Executing differential evolution...\n')
     res = differential_evolution(
         func=objective_function,
         bounds=parameter_definitions.get_variable_parameters_bounds(),
-        args=(args.model_path, args.scenario, parameter_definitions, args.samples),
+        args=(
+            args.model_path,
+            args.scenario,
+            parameter_definitions,
+            args.samples,
+            max_func_evaluations,
+            func_evaluations_counter,
+            func_evaluations_counter_lock
+        ),
         workers=workers,
         updating='deferred',
         popsize=popsize,
