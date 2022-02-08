@@ -59,7 +59,7 @@ def print_pid(*args, **kwargs):
 
 def objective_function(variables : List[int], *args):
     start_time = datetime.now()
-    model_path, scenario, parameter_definitions, samples = args
+    model_path, scenario, parameter_definitions, num_samples = args
 
     print_pid('Creating workspace...')
     workspace = nl4py.create_headless_workspace()
@@ -67,14 +67,13 @@ def objective_function(variables : List[int], *args):
     print_pid('Opening model...')
     workspace.open_model(str(model_path))
 
-    fitness = 0
-    for samp_number in range(samples):
-        print_pid(f'(sample {samp_number}) Loading scenario: {scenario}...')
+    samples = []
+    for samp_id in range(num_samples):
+        print_pid(f'(sample {samp_id}) Loading scenario: {scenario}...')
         workspace.command(f'set selectScenario "{scenario}"')
         workspace.command('load_scenario')
 
-        print_pid(f'(sample {samp_number}) Setting parameters...')
-        average = 0
+        print_pid(f'(sample {samp_id}) Setting parameters...')
         for (k, v) in parameter_definitions.fixed:
             cmd = f'set_parameter "{k}" {v}'
             # print_pid('(fixed)', cmd)
@@ -86,18 +85,18 @@ def objective_function(variables : List[int], *args):
             workspace.command(cmd)
             # print_pid('(variable)', cmd)
 
-        print_pid(f'(sample {samp_number}) Simulating...')
+        print_pid(f'(sample {samp_id}) Simulating...')
         workspace.command('run-simulation-with-moving-targets')
         fitness = workspace.report('fitness-moving-targets') # average of percentage of time found in the timeslots
-        average += fitness
+        samples.append(fitness)
 
-    average /= samples # take the average of all samples
+    average = sum(samples) / len(samples) # take the average of all samples
 
     workspace.close_model()
     nl4py.delete_headless_workspace(workspace)
 
     time_ellapsed = datetime.now() - start_time
-    print_pid(f'Done in {time_ellapsed}! average fitness value: {average}')
+    print_pid(f'Done in {time_ellapsed}! samples: {samples}; average: {average}')
 
     # since differential_evolution minimizes and we want to maximize, return fitness with changed sign
     return -average
