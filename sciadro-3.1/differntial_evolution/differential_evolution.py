@@ -145,7 +145,7 @@ if __name__ == '__main__':
 
     workers = multiprocessing.cpu_count()
     popsize = max(1, workers // len(parameter_definitions.variable))
-    max_func_evaluations = args.samples * (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
+    max_func_evaluations = (args.max_iter + 1) * popsize * len(parameter_definitions.variable)
 
     manager = multiprocessing.Manager()
     func_evaluations_counter = manager.Value(int, 0)
