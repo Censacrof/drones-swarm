@@ -131,11 +131,22 @@ class SimulationWorker implements Runnable {
 			}
 
 			System.out.println(simulationRequest.getSetupCommands());
-	
+
+			// start simulation
+			double simulationResult;
 			try {
-				// start simulation
-				double simulationResult = simulate(simulationRequest);
+				simulationResult = simulate(simulationRequest);
+			} catch (Exception e) {
+				sendResponse(
+					new SimulationRespose()
+						.setError(true)
+						.setResponseMessage(e.getMessage())
+				);
+
+				return;
+			}
 	
+			try {	
 				// respond
 				SimulationRespose simulationRespose = new SimulationRespose()
 					.setSimulationResult(simulationResult);
