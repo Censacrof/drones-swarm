@@ -53,7 +53,7 @@ public class SimulationServer implements Runnable {
 				100 // backlog
 			);
 
-			System.out.println("Listening on port " + this.port);
+			// System.out.println("Listening on port " + this.port);
 
 			// notify the the thread wating inside start()
 			synchronized (this) {
@@ -69,7 +69,7 @@ public class SimulationServer implements Runnable {
 					break;
 				}
 
-				System.out.println("Connection accepted");
+				// System.out.println("Connection accepted");
 
 				SimulationWorker simulationWorker = new SimulationWorker(clientSock, modelPath, _workspaces);
 				Thread workerThread = new Thread(simulationWorker);
@@ -94,7 +94,7 @@ class SimulationWorker implements Runnable {
 	}
 
 	public void run() {
-		System.out.println("Worker started");
+		// System.out.println("Worker started");
 
 		// read json from the socket
 		try (
@@ -115,7 +115,7 @@ class SimulationWorker implements Runnable {
 			}
 	
 			// parse json
-			System.out.println(requestString);
+			// System.out.println(requestString);
 			SimulationRequest simulationRequest = new Gson().fromJson(requestString, SimulationRequest.class);
 
 			if (simulationRequest == null) {
@@ -128,7 +128,7 @@ class SimulationWorker implements Runnable {
 				return;
 			}
 
-			System.out.println(simulationRequest.getSetupCommands());
+			// System.out.println(simulationRequest.getSetupCommands());
 
 			// start simulation
 			double simulationResult;
@@ -183,11 +183,11 @@ class SimulationWorker implements Runnable {
 
 		// if there was no available workspace => create one
 		if (workspace == null) {
-			System.out.println("Creating workspace...");
+			// System.out.println("Creating workspace...");
 			workspace = HeadlessWorkspace.newInstance();
-			System.out.println("Opening model " + modelPath + " ...");
+			// System.out.println("Opening model " + modelPath + " ...");
 			workspace.open(modelPath);
-			System.out.println("Done!");
+			// System.out.println("Done!");
 		}
 
 		// run all setup commands
@@ -196,7 +196,7 @@ class SimulationWorker implements Runnable {
 		}
 
 		// run the simulation
-		while ((boolean) workspace.report(simulationRequest.getStopConditionReport())) {
+		while (!(boolean) workspace.report(simulationRequest.getStopConditionReport())) {
 			workspace.command(simulationRequest.getGoCommmand());
 		}
 
