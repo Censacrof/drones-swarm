@@ -1,13 +1,12 @@
-from audioop import mul
-from base64 import encode
 import multiprocessing
 import argparse
 import pathlib
 from typing import *
 import json
 import sys
-import socket
 import asyncio
+from datetime import datetime
+from numpy import average
 from scipy.optimize import differential_evolution
 
 import jpype
@@ -83,24 +82,65 @@ async def make_request(server_addr, server_port, setup_commands, go_command, end
 
 
 def objective_function(variables : List[int], *args):
-    # make request
-    resp_obj = asyncio.run(make_request(
-        server_addr='127.0.0.1',
-        server_port=1234,
-        setup_commands=['nella', 'bella', 'fattoria'],
-        go_command='go',
-        end_report='get-fitness',
-        stop_condition_report='should-stop?'
-    ))
+    (
+        server_addr,
+        server_port,
+        scenario,
+        parameter_definitions,
+        num_samples
+    ) = args
 
-    # check if server responded with an error
-    if 'error' in resp_obj:
-        err_msg = resp_obj['error']
-        raise SimulationError(f'Server responded with an error: {err_msg}')
+    # save current time
+    start_time = datetime.now()
 
-    fitness = 0
+    # create setup commands list
+    print_pid('Generating setup commands...')
+    setup_commads = [
+        f'set selectScenario "{scenario}"',
+        'load_scenario',
+        'init-simulation'
+    ]
+    for (k, v) in parameter_definitions.fixed:
+        setup_commads.append(f'set_parameter "{k}" {v}')    
+    for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
+        v = variables[i]
+        setup_commads.append(f'set_parameter "{k}" {v}')
 
-    return fitness
+    fitness_samples = []
+    for i in range(num_samples):
+        # make request
+        resp_obj = asyncio.run(make_request(
+            server_addr=server_addr,
+            server_port=server_port,
+            setup_commands=setup_commads,
+            go_command='go-simulation',
+            end_report='get-fitness',
+            stop_condition_report='should-stop?'
+        ))
+
+        # check if server responded with an error
+        if 'error' in resp_obj:
+            err_msg = resp_obj['error']
+            raise SimulationError(f'Server responded with an error: {err_msg}')
+
+        # check if response is valid
+        if 'simulationResult' not in resp_obj:
+            raise RuntimeError('Server sent an invalid response')
+
+        fitness = resp_obj['simulationResult']
+        print_pid(f'Fitness: {fitness}')
+        
+        fitness_samples.append(fitness)
+
+    # calculate average fitness
+    average_fitness = sum(fitness_samples) / len(fitness_samples)
+
+
+    time_ellapsed = datetime.now() - start_time
+    print_pid(f'Done in {time_ellapsed}. average: {average_fitness}; samples: {fitness_samples};')
+
+    # return negative average fitness since differential_evolution tries to minimize
+    return -average_fitness
 
 def server_process(*args, **kwargs):
     (wait_condition_server_not_started, wait_condition_evolution_not_ended) = args
@@ -177,8 +217,14 @@ if __name__ == '__main__':
         res = differential_evolution(
             func=objective_function,
             bounds=parameter_definitions.get_variable_parameters_bounds(),
-            args=(),
-            workers=1,# workers,
+            args=(
+                '127.0.0.1',                # server_addr
+                1234,                       # server_port
+                args.scenario,              # scenario
+                parameter_definitions,      # parameter_definitions
+                args.samples,               # num_samples
+            ),
+            workers=workers,
             updating='deferred',
             popsize=popsize,
             maxiter=args.max_iter,
@@ -188,6 +234,11 @@ if __name__ == '__main__':
             init='latinhypercube',
             disp=True
         )
+
+        print(res)
+        for i, (k, lb, ub) in enumerate(parameter_definitions.variable):
+            v = res.x[i]
+            print(f'\t{k}={v}')
     except SimulationError as e:
         print('An error has occured during a simulation.', e)
 
