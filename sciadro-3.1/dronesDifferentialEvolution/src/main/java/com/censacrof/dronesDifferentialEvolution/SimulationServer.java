@@ -107,8 +107,7 @@ class SimulationWorker implements Runnable {
 			if (requestString == null) {
 				sendResponse(
 					new SimulationRespose()
-						.setError(true)
-						.setResponseMessage("Empty request")
+						.setError("Empty request")
 				);
 
 				_clientSock.close();
@@ -122,8 +121,7 @@ class SimulationWorker implements Runnable {
 			if (simulationRequest == null) {
 				sendResponse(
 					new SimulationRespose()
-						.setError(true)
-						.setResponseMessage("Can't parse request")
+						.setError("Can't parse request")
 				);
 
 				_clientSock.close();
@@ -139,8 +137,7 @@ class SimulationWorker implements Runnable {
 			} catch (Exception e) {
 				sendResponse(
 					new SimulationRespose()
-						.setError(true)
-						.setResponseMessage(e.getMessage())
+						.setError(e.getMessage())
 				);
 
 				return;
@@ -253,7 +250,7 @@ class SimulationWorker implements Runnable {
 	@SuppressWarnings("unused")
 	private class SimulationRespose {
 		private String responseMessage;
-		private Boolean error;
+		private String error;
 		private Double simulationResult;
 
 		public SimulationRespose setSimulationResult(Double endReportValue) {
@@ -261,7 +258,7 @@ class SimulationWorker implements Runnable {
 			return this;
 		}
 
-		public SimulationRespose setError(Boolean error) {
+		public SimulationRespose setError(String error) {
 			this.error = error;
 			return this;
 		}
