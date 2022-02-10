@@ -18,7 +18,6 @@ public class SimulationServer implements Runnable {
 	public final String modelPath;
 	private ArrayList<HeadlessWorkspace> _workspaces;
 	private Thread _listenerThread;
-	private boolean _shouldStop = false;
 
 	public SimulationServer(int port, String modelPath) {
 		this.port = port;
@@ -26,16 +25,20 @@ public class SimulationServer implements Runnable {
 		this._listenerThread = null;
 	}
 
-	public void start() {
-		_shouldStop = false;
+	public void start() throws InterruptedException {
 		_workspaces = new ArrayList<>();
 		_listenerThread = new Thread(this);
 		_listenerThread.start();
+
+		// wait untill _listenerThread is listening
+		synchronized(this) {
+			wait();
+		}
 	}
 
 	public void stop() {
-		_shouldStop = true;
 		try {
+			_listenerThread.interrupt();
 			_listenerThread.join();
 		} catch (InterruptedException ignore) { }
 	}
@@ -44,11 +47,17 @@ public class SimulationServer implements Runnable {
 		try (
 			ServerSocket serverSock = new ServerSocket(
 				this.port,
-				10 // backlog
+				100 // backlog
 			);
 		) {
 			System.out.println("Listening on port " + this.port);
-			while (!_shouldStop) {
+
+			// notify the the thread wating inside start()
+			synchronized (this) {
+				notify();
+			}
+			
+			while (true) {
 				Socket clientSock = serverSock.accept();
 				System.out.println("Connection accepted");
 
