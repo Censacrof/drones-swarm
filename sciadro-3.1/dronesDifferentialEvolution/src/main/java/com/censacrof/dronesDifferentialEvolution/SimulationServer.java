@@ -13,18 +13,34 @@ import com.google.gson.GsonBuilder;
 
 import org.nlogo.headless.HeadlessWorkspace;
 
-public class SimulationServer {
+public class SimulationServer implements Runnable {
 	public final int port;
 	public final String modelPath;
-	private final ArrayList<HeadlessWorkspace> _workspaces;
+	private ArrayList<HeadlessWorkspace> _workspaces;
+	private Thread _listenerThread;
+	private boolean _shouldStop = false;
 
 	public SimulationServer(int port, String modelPath) {
 		this.port = port;
 		this.modelPath = modelPath;
-		this._workspaces = new ArrayList<>();
+		this._listenerThread = null;
 	}
 
-	public void runServer() {
+	public void start() {
+		_shouldStop = false;
+		_workspaces = new ArrayList<>();
+		_listenerThread = new Thread(this);
+		_listenerThread.start();
+	}
+
+	public void stop() {
+		_shouldStop = true;
+		try {
+			_listenerThread.join();
+		} catch (InterruptedException ignore) { }
+	}
+
+	public void run() {
 		try (
 			ServerSocket serverSock = new ServerSocket(
 				this.port,
@@ -32,7 +48,7 @@ public class SimulationServer {
 			);
 		) {
 			System.out.println("Listening on port " + this.port);
-			while (true) {
+			while (!_shouldStop) {
 				Socket clientSock = serverSock.accept();
 				System.out.println("Connection accepted");
 
