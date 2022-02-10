@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 import com.google.gson.Gson;
@@ -18,6 +19,7 @@ public class SimulationServer implements Runnable {
 	public final String modelPath;
 	private ArrayList<HeadlessWorkspace> _workspaces;
 	private Thread _listenerThread;
+	private ServerSocket _serverSock;
 
 	public SimulationServer(int port, String modelPath) {
 		this.port = port;
@@ -36,20 +38,21 @@ public class SimulationServer implements Runnable {
 		}
 	}
 
-	public void stop() {
+	public void stop() throws IOException {
 		try {
+			_serverSock.close();
 			_listenerThread.interrupt();
 			_listenerThread.join();
 		} catch (InterruptedException ignore) { }
 	}
 
 	public void run() {
-		try (
-			ServerSocket serverSock = new ServerSocket(
+		try {
+			_serverSock = new ServerSocket(
 				this.port,
 				100 // backlog
 			);
-		) {
+
 			System.out.println("Listening on port " + this.port);
 
 			// notify the the thread wating inside start()
@@ -58,7 +61,14 @@ public class SimulationServer implements Runnable {
 			}
 			
 			while (true) {
-				Socket clientSock = serverSock.accept();
+				Socket clientSock;
+				try {
+					clientSock = _serverSock.accept();
+				} catch (SocketException e) {
+					// the socket was closed => exit
+					break;
+				}
+
 				System.out.println("Connection accepted");
 
 				SimulationWorker simulationWorker = new SimulationWorker(clientSock, modelPath, _workspaces);
