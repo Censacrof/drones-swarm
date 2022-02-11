@@ -142,7 +142,12 @@ def objective_function(variables : List[int], *args):
     return -average_fitness
 
 def server_process(*args, **kwargs):
-    (netlogo_home, wait_condition_server_not_started, wait_condition_evolution_not_ended) = args
+    (
+        netlogo_home,
+        model_path,
+        wait_condition_server_not_started,
+        wait_condition_evolution_not_ended
+    ) = args
 
     # get script folder path
     script_folder_path = pathlib.Path(str(os.path.realpath(__file__))).parent
@@ -158,7 +163,7 @@ def server_process(*args, **kwargs):
     from com.github.censacrof.drones import SimulationServer # type: ignore (suppress warning)
 
     print('Starting simulation server')
-    simulation_server = SimulationServer(1234, '/home/francesco/git/drones-swarm/sciadro-3.1/SCD src.nlogo')
+    simulation_server = SimulationServer(1234, str(model_path))
     simulation_server.start()
 
     # notify that the server has started
@@ -198,6 +203,7 @@ if __name__ == '__main__':
         target=server_process,
         args=(
             args.netlogo_home,
+            args.model_path,
             wait_condition_server_not_started,
             wait_condition_evolution_not_ended,
         )
