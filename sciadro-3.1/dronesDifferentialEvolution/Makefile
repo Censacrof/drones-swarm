@@ -19,7 +19,7 @@ SimulationServer: SimulationServer.jar
 SimulationServer.jar: $(CLASS_FILES)
 	cd $(CLASS_DIR) && jar cvf $@ * && cd - && mv $(CLASS_DIR)/$@ .
 
-# compile each .java in SRC_DIR file and put the resulting .class file under CLASS_DIR
+# compile each .java file in SRC_DIR and put the resulting .class file under CLASS_DIR
 $(CLASS_DIR)/%.class: $(SRC_DIR)/%.java
 	@mkdir -p $(dir $@)
 	$(JC) $(JFLAGS) -d $(CLASS_DIR) $<
