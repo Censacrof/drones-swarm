@@ -149,7 +149,7 @@ def server_process(*args, **kwargs):
     jpype.startJVM(
         classpath=[
             '/netlogo/app/netlogo-6.2.2.jar',
-            'target/dronesDifferentialEvolution-1.0-SNAPSHOT.jar', 
+            str(script_folder_path / 'SimulationServer.jar'),
             str(script_folder_path / 'lib' / 'gson-2.8.9.jar')
         ]
     )

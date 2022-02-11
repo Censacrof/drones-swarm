@@ -1,0 +1,42 @@
+{
+    "fixed": {
+        "strategy": 3,
+        "simulationTime": 0,
+
+        "droneRadius": 0.2,
+        "cruisingSpeed": 1,
+        "speedMax": 8.5,
+        "acceleration": 2,
+        "deceleration": -2,
+        "angularVelMax": 120,
+        "angularAcc": 7,
+        "angularDec": -7,
+        "endurance": 24,
+        "sensingRadius": 2.5,        
+        "sensingAngle": 360,
+        "sensingBase": 5,
+        "sensingHeight": 4,
+
+        "reachableRadius": 4,
+        "reachableAngle": 360,
+        "sightAngleMax": 60,
+        "collisionVision": 6,
+        "gapAngle": 20        
+    },
+    "variable": {
+        "radiusTop": [0, 10],
+        "radiusDown": [0, 20],
+        "evapRate": [0.01, 1],
+        "olfaction": [1, 60],
+
+        "wiggleVar": [1, 15],
+
+        "flockAngle": [90, 360],
+        "radiusSeparate": [5, 10],
+        "maxSeparateTurn": [0, 20],
+        "radiusAlign": [5, 15],
+        "maxAlignTurn": [0, 20],
+        "radiusCohere": [5, 20],
+        "maxCohereTurn": [0, 20]
+    }
+}
