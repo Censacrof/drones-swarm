@@ -1,22 +1,25 @@
 globals [
-  fitness
-  shuld-stop-simulation?
+  fitness-samples
 ]
 
-to run-simulation-with-moving-targets
-  set fitness []
-  
-  set shuld-stop-simulation? false
-  while [ not shuld-stop-simulation? and ticks <= environment.deploymentTime + targets.transitionPeriod * targets.configurations ] [
-    go
+
+to init-simulation
+  set fitness-samples []
+end
+
+to go-simulation
+  go
     
-    if (targets.timeSlot > -1 and endTimeSlot?) [
-      set fitness lput percentageTgtsFound fitness
-    ]
+  if (targets.timeSlot > -1 and endTimeSlot?) [
+    set fitness-samples lput percentageTgtsFound fitness-samples
   ]
 end
 
-to-report fitness-moving-targets
-  report mean fitness
+to-report should-stop?
+  report not (ticks <= environment.deploymentTime + targets.transitionPeriod * targets.configurations)
 end
-  
+
+to-report get-fitness
+  report mean fitness-samples
+end
+
