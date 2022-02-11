@@ -1,4 +1,4 @@
-package com.censacrof.dronesDifferentialEvolution;
+package com.github.censacrof.drones;
 
 import java.io.BufferedReader;
 import java.io.IOException;

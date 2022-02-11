@@ -155,7 +155,7 @@ def server_process(*args, **kwargs):
         ]
     )
 
-    from com.censacrof.dronesDifferentialEvolution import SimulationServer # type: ignore (suppress warning)
+    from com.github.censacrof.drones import SimulationServer # type: ignore (suppress warning)
 
     print('Starting simulation server')
     simulation_server = SimulationServer(1234, '/home/francesco/git/drones-swarm/sciadro-3.1/SCD src.nlogo')
