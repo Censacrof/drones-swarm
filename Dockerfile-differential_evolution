@@ -1,0 +1,23 @@
+FROM openjdk:8-jdk
+WORKDIR /netlogo
+RUN wget https://ccl.northwestern.edu/netlogo/6.2.2/NetLogo-6.2.2-64.tgz \
+    && tar zxvpf NetLogo-6.2.2-64.tgz \
+    && rm NetLogo-6.2.2-64.tgz \
+    && mv NetLogo\ 6.2.2/* . \
+    && rm -rf mv NetLogo\ 6.2.2
+WORKDIR /app
+RUN apt-get update -y
+RUN apt-get install -y python3
+RUN apt-get install -y python3-pip
+COPY sciadro-3.1/ ./sciadro/
+COPY differential_evolution/requirements.txt differential_evolution/requirements.txt
+RUN pip3 install -r differential_evolution/requirements.txt
+COPY differential_evolution/java differential_evolution/java
+WORKDIR /app/differential_evolution/java
+RUN make clean
+RUN make SimulationServer NETLOGO_HOME=/netlogo
+WORKDIR /app
+COPY differential_evolution/differential_evolution.py differential_evolution/differential_evolution.py
+COPY differential_evolution/parameters.json differential_evolution/parameters.json
+ENTRYPOINT ["python3", "differential_evolution/differential_evolution.py", "/netlogo", "sciadro/SCD src.nlogo"]
+CMD ["fire1", "differential_evolution/parameters.json"]
