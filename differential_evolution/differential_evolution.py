@@ -150,8 +150,8 @@ def server_process(*args, **kwargs):
     jpype.startJVM(
         classpath=[
             str(netlogo_home / 'app/*'),
-            str(script_folder_path / 'SimulationServer.jar'),
-            str(script_folder_path / 'lib/*')
+            str(script_folder_path / 'java/SimulationServer.jar'),
+            str(script_folder_path / 'java/lib/*')
         ]
     )
 
