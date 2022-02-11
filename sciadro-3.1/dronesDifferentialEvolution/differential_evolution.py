@@ -6,8 +6,8 @@ import json
 import sys
 import asyncio
 from datetime import datetime
-from numpy import average
 from scipy.optimize import differential_evolution
+import os
 
 import jpype
 import jpype.imports
@@ -127,9 +127,7 @@ def objective_function(variables : List[int], *args):
         if 'simulationResult' not in resp_obj:
             raise RuntimeError('Server sent an invalid response')
 
-        fitness = resp_obj['simulationResult']
-        print_pid(f'Fitness: {fitness}')
-        
+        fitness = resp_obj['simulationResult']        
         fitness_samples.append(fitness)
 
     # calculate average fitness
@@ -145,11 +143,14 @@ def objective_function(variables : List[int], *args):
 def server_process(*args, **kwargs):
     (wait_condition_server_not_started, wait_condition_evolution_not_ended) = args
 
+    # get script folder path
+    script_folder_path = pathlib.Path(str(os.path.realpath(__file__))).parent
+
     jpype.startJVM(
         classpath=[
             '/netlogo/app/netlogo-6.2.2.jar',
             'target/dronesDifferentialEvolution-1.0-SNAPSHOT.jar', 
-            '/home/francesco/.m2/repository/com/google/code/gson/gson/2.8.9/gson-2.8.9.jar'
+            str(script_folder_path / 'lib' / 'gson-2.8.9.jar')
         ]
     )
 
