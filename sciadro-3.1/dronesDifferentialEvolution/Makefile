@@ -24,7 +24,7 @@ $(CLASS_DIR)/%.class: $(SRC_DIR)/%.java
 	@mkdir -p $(dir $@)
 	$(JC) $(JFLAGS) -d $(CLASS_DIR) $<
 
-.PHONY: clean, 
+.PHONY: clean 
 clean:
 	rm -rf $(CLASS_DIR)
 	rm -f SimulationServer.jar
