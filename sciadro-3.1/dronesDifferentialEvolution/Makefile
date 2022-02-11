@@ -1,5 +1,5 @@
 JC=javac
-JFLAGS=-cp "lib/*:/netlogo/app/*"
+JFLAGS:=-cp "lib/*:$(NETLOGO_HOME)/app/*"
 SRC_DIR=./src
 CLASS_DIR=./class
 

@@ -1,3 +1,4 @@
+from ast import arg
 import multiprocessing
 import argparse
 import pathlib
@@ -141,16 +142,16 @@ def objective_function(variables : List[int], *args):
     return -average_fitness
 
 def server_process(*args, **kwargs):
-    (wait_condition_server_not_started, wait_condition_evolution_not_ended) = args
+    (netlogo_home, wait_condition_server_not_started, wait_condition_evolution_not_ended) = args
 
     # get script folder path
     script_folder_path = pathlib.Path(str(os.path.realpath(__file__))).parent
 
     jpype.startJVM(
         classpath=[
-            '/netlogo/app/netlogo-6.2.2.jar',
+            str(netlogo_home / 'app/*'),
             str(script_folder_path / 'SimulationServer.jar'),
-            str(script_folder_path / 'lib' / 'gson-2.8.9.jar')
+            str(script_folder_path / 'lib/*')
         ]
     )
 
@@ -180,7 +181,7 @@ if __name__ == '__main__':
         description="Finds optimal parameters using the differential evolution algorithm",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument('netlogo_path', type=pathlib.Path, help='Path of the top level directory of the Netlogo installation')
+    parser.add_argument('netlogo_home', type=pathlib.Path, help='Path of the top level directory of the Netlogo installation')
     parser.add_argument('model_path', type=pathlib.Path, help='Path of the model to optimize')
     parser.add_argument('scenario', type=str, help='Name of the scenario to simulate')
     parser.add_argument('parameters_path', type=pathlib.Path, help='Path of file containg the parameters\' bounds')
@@ -196,6 +197,7 @@ if __name__ == '__main__':
     server_process = multiprocessing.Process(
         target=server_process,
         args=(
+            args.netlogo_home,
             wait_condition_server_not_started,
             wait_condition_evolution_not_ended,
         )
