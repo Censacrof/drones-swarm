@@ -153,7 +153,7 @@ def server_process(*args, **kwargs):
 
     jpype.startJVM(
         jpype.getDefaultJVMPath(),
-        '-Xmx2048m',
+        '-Xmx4096m',
         '-Dfile.encoding=UTF-8',
         classpath=[
             str(netlogo_home / 'app/*'),
