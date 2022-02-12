@@ -22,7 +22,7 @@ SimulationServer.jar: $(CLASS_FILES)
 # compile each .java file in SRC_DIR and put the resulting .class file under CLASS_DIR
 $(CLASS_DIR)/%.class: $(SRC_DIR)/%.java
 	@mkdir -p $(dir $@)
-	$(JC) $(JFLAGS) -d $(CLASS_DIR) $<
+	$(JC) $(JFLAGS) -sourcepath $(SRC_DIR) -d $(CLASS_DIR) $<
 
 .PHONY: clean 
 clean:
