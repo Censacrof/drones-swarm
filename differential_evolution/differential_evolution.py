@@ -164,7 +164,7 @@ def server_process(*args, **kwargs):
 
     from com.github.censacrof.drones import SimulationServer # type: ignore (suppress warning)
 
-    print('Starting simulation server')
+    print_pid('Starting simulation server')
     simulation_server = SimulationServer(1234, str(model_path))
     simulation_server.start()
 
@@ -177,7 +177,7 @@ def server_process(*args, **kwargs):
         wait_condition_evolution_not_ended.wait()
     
     # stop the server
-    print('Stopping simulation server')
+    print_pid('Stopping simulation server')
     simulation_server.stop()
     pass
 
@@ -210,6 +210,7 @@ if __name__ == '__main__':
             wait_condition_evolution_not_ended,
         )
     )
+    server_process.name = 'SimulationServerProcess'
     server_process.start()
 
     # wait for the server to start
