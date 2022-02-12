@@ -253,12 +253,13 @@ if __name__ == '__main__':
             print(f'\t{k}={v}')
     except SimulationError as e:
         print('An error has occured during a simulation.', e)
+    except KeyboardInterrupt as e:
+        print('Received keyboard interrupt')
+    finally:
+        # tell the server to stop
+        with wait_condition_evolution_not_ended:
+            wait_condition_evolution_not_ended.notify()
 
-    # tell the server to stop
-    with wait_condition_evolution_not_ended:
-        wait_condition_evolution_not_ended.notify()
-
-    # wait until the server stops
-    server_process.join()
-
+        # wait until the server stops
+        server_process.join()
     pass
