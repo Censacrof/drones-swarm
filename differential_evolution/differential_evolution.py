@@ -152,6 +152,9 @@ def server_process(*args, **kwargs):
     script_folder_path = pathlib.Path(str(os.path.realpath(__file__))).parent
 
     jpype.startJVM(
+        jpype.getDefaultJVMPath(),
+        '-Xmx2048m',
+        '-Dfile.encoding=UTF-8',
         classpath=[
             str(netlogo_home / 'app/*'),
             str(script_folder_path / 'java/SimulationServer.jar'),
